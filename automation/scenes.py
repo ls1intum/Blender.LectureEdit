@@ -24,15 +24,7 @@ def __ensure_scene(name):
     scene.render.resolution_x = 1920
     scene.render.resolution_y = 1080
     scene.render.fps = 25
-    scene.render.ffmpeg.format = "MPEG4"
-    scene.render.ffmpeg.codec = "H264"
-    scene.render.ffmpeg.constant_rate_factor = "HIGH"
-    scene.render.ffmpeg.ffmpeg_preset = "GOOD"
-    scene.render.ffmpeg.audio_codec = "VORBIS"
-    scene.render.ffmpeg.audio_bitrate = 128
-    scene.render.ffmpeg.audio_channels = "MONO"
-    scene.render.ffmpeg.audio_mixrate = 44100
-    scene.render.image_settings.view_settings.view_transform = "Standard"
+    scene.view_settings.view_transform = "Raw"
     return scene
 
 
@@ -196,7 +188,7 @@ def setup_greenscreen_scenes(scenes, paths, config):
         keying.edge_kernel_radius = kconfig.get("Edge Kernel Radius", keying.edge_kernel_radius)
         keying.edge_kernel_tolerance = kconfig.get("Edge Kernel Tolerance", 0.3)
         keying.clip_black = kconfig.get("Clip Black", 0.2)
-        keying.clip_white = kconfig.get("Clip White", keying.clip_white)
+        keying.clip_white = kconfig.get("Clip White", 0.9)
         keying.dilate_distance = kconfig.get("Dilate/Erode", keying.dilate_distance)
         keying.inputs["Key Color"].default_value.foreach_set(
             kconfig.get("Key Color", keying.inputs["Key Color"].default_value)
@@ -280,9 +272,7 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
         )
         effect_strip.blend_type = "ALPHA_OVER"
         effect_strip.interpolation = "BICUBIC"
-        # effect_strip.use_crop = True
-        # effect_strip.use_translation = True
-        # effect_strip.use_uniform_scale = True
+        effect_strip.use_uniform_scale = True
         effect_strip.scale_start_x = speaker_placement["scale"]
         effect_strip.scale_start_y = speaker_placement["scale"]
         effect_strip.crop.min_x = speaker_placement["crop_left"]
@@ -327,7 +317,19 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
         strip.frame_final_end = length
     scene.frame_end = length
     # load the slide transitions and titles
+    scene.timeline_markers.clear()
     setup_slide_markers(scene, config)
+    # configure the render settings
+    scene.render.image_settings.file_format = "FFMPEG"
+    scene.render.ffmpeg.format = "MPEG4"
+    scene.render.ffmpeg.codec = "H264"
+    scene.render.ffmpeg.constant_rate_factor = "HIGH"
+    scene.render.ffmpeg.ffmpeg_preset = "GOOD"
+    scene.render.ffmpeg.audio_codec = "VORBIS"
+    scene.render.ffmpeg.audio_bitrate = 128
+    scene.render.ffmpeg.audio_channels = "MONO"
+    scene.render.ffmpeg.audio_mixrate = 44100
+    scene.render.filepath = paths.lecture_video.blender
 
 
 def save_merge_scene(scene, paths, config):

@@ -86,7 +86,7 @@ class Paths:
         self.presentation_video = self.__file(self.intermediate_path, "lecture_presentation.mp4")
         self.lecture_audio = self.__file(self.intermediate_path, "lecture_audio.flac")
         # final data
-        self.lecture_video = self.__file(self.final_path, f"{self.base_name}.webm")
+        self.lecture_video = self.__file(self.final_path, f"{self.base_name}.mp4")
         self.lecture_handout = self.__file(self.final_path, f"{self.base_name}.pdf")
         # other
         self.speaker_placement = self.__file(self.common_path, "speaker_placement.png")

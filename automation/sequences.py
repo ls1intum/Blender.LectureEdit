@@ -13,7 +13,6 @@ def ensure_audio_strips(sequence_editor, cuts, channel, base_name):
         ),
     ):
         strip.show_waveform = True
-        strip.sound.use_mono = True
         yield strip
 
 
