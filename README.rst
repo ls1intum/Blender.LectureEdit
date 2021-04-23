@@ -29,11 +29,11 @@ Usage
    * Put the Microsoft PowerPoint file with the slides in the *Source* folder and give it the same name as the blender project, except for the file ending, which has to be *.pptx*.
    * Put a video recording of the speaker in the source file.
      The file name must begin with the same name as the Blender project file (without the file ending).
-     After that, the file name must contain the affix * - Speaker* for a regular recording or * - Greenscreen* for a greenscreen recording.
+     After that, the file name must contain the affix *\ - Speaker* for a regular recording or *\ - Greenscreen* for a greenscreen recording.
      You can put numbers after this affix, if this recording is split to multiple files.
      At the end, there has to be the regular file ending of the video file.
-   * If you have a video of the speaker's slides, you put it also in the *Source* folder and use the same naming scheme, but with the affix * - Slides*.
-   * If you have a separate recording of the speaker's audio, you can again put it in the *Source* folder, rename it and use the affix * - Audio*.
+   * If you have a video of the speaker's slides, you put it also in the *Source* folder and use the same naming scheme, but with the affix *\ - Slides*.
+   * If you have a separate recording of the speaker's audio, you can again put it in the *Source* folder, rename it and use the affix *\ - Audio*.
 
 4. Open the file *automation.py*, that you find in the *automation* folder of *Blender.LectureEdit*, with Blender's text editor.
 5. Uncomment the processing step, that you want to do next in the Python file.
