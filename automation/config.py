@@ -53,7 +53,7 @@ class Config:
                 configured = {self.__paths.from_standard(k): v for k, v in cut.items()}
                 result = {files[0]: configured.get(files[0], [(0, 1, None)])}
                 for p in files[1:]:
-                    result[p] = configured.get(p, [(0, None, None)])
+                    result[p] = configured.get(p, [(None, None, None)])
                 return result
             else:
                 return {}

@@ -70,7 +70,7 @@ def cut_config(paths, sequence_editor, channel):
 
 def __ensure_strips(sequence_editor, cuts, channel, base_name, path_function, create_function):
     strips = list(sequence_editor.sequences)
-    frame = 1
+    frame = 0
     i = 0
     paths = sorted(cuts.keys())
     for path in paths:
@@ -101,6 +101,8 @@ def __ensure_strips(sequence_editor, cuts, channel, base_name, path_function, cr
             strip = create_function(f"{base_name} {i:02}", path, 16, 0)
             if end is None:
                 end = start + strip.frame_duration
+            if offset is None:
+                offset = start
             logging.info(f"created {type(strip).__name__} strip from {path.blender} for {strip.name}")
             strip.frame_start = offset
             strip.frame_final_start = start
