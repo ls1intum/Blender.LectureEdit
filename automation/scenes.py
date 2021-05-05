@@ -24,7 +24,7 @@ def __ensure_scene(name):
     scene.render.resolution_x = 1920
     scene.render.resolution_y = 1080
     scene.render.fps = 25
-    scene.view_settings.view_transform = "Raw"
+    scene.view_settings.view_transform = "Standard"
     return scene
 
 
