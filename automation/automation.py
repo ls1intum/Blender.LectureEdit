@@ -15,6 +15,7 @@ logging.info = print
 import paths
 import config
 import pptx
+import normalization
 import external
 import sequences
 import scenes
@@ -25,6 +26,7 @@ importlib.reload(paths)
 importlib.reload(config)
 importlib.reload(pptx)
 importlib.reload(external)
+importlib.reload(normalization)
 importlib.reload(sequences)
 importlib.reload(scenes)
 
@@ -38,7 +40,7 @@ sync_scene, cut_scene, slides_scene, greenscreen_scenes, merge_scene = scenes.sc
 #scenes.save_sync_scene(sync_scene, paths, config)
 #scenes.setup_cut_scene(cut_scene, paths, config)
 #scenes.save_cut_scene(cut_scene, paths, config)
-#external.normalize_audio(paths, config)
+#external.normalize_audio(paths)
 #scenes.setup_slides_scene(slides_scene, paths, config)
 #scenes.save_slides_scene(slides_scene, paths, config)
 #external.create_presentation(merge_scene, paths, config)

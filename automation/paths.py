@@ -80,11 +80,11 @@ class Paths:
         self.slide_transitions = self.__file(self.intermediate_path, "slide_transitions.json")
         self.speaker_visibility = self.__file(self.intermediate_path, "speaker_visibility.json")
         self.audio_config = self.__file(self.intermediate_path, "audio.json")
-        self.rough_audio = self.__file(self.intermediate_path, "rough_audio.flac")
+        self.rough_audio = self.__file(self.intermediate_path, "rough_audio.wav")
         # processed data
         self.lecture_presentation = self.__file(self.intermediate_path, "lecture_presentation.pptx")
         self.presentation_video = self.__file(self.intermediate_path, "lecture_presentation.mp4")
-        self.lecture_audio = self.__file(self.intermediate_path, "lecture_audio.flac")
+        self.lecture_audio = self.__file(self.intermediate_path, "lecture_audio.wav")
         # final data
         self.lecture_video = self.__file(self.final_path, f"{self.base_name}.mp4")
         self.lecture_handout = self.__file(self.final_path, f"{self.base_name}.pdf")

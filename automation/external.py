@@ -1,7 +1,6 @@
 import os
-import shutil
 import subprocess
-import tempfile
+import normalization
 import pptx
 
 
@@ -20,32 +19,19 @@ def adjust_slides_videos(paths):
         output = subprocess.check_output(command)
 
 
-def normalize_audio(paths, config):
-    audio_file = paths.rough_audio
-    factor = config.audio_normalization(audio_file)
-    if factor > 1.0:
-        with tempfile.TemporaryDirectory() as d:
-            intermediate_file = os.path.join(d, "temp.flac")
-            output = subprocess.check_output(
-                [
-                    "lv2file",
-                    "-i",
-                    audio_file.os,
-                    "-o",
-                    intermediate_file,
-                    "--ignore-clipping",
-                    "-c",
-                    "1:in_1",
-                    "-c",
-                    "1:in_2",
-                    "-p",
-                    "ingain:17",
-                    "http://plugin.org.uk/swh-plugins/fastLookaheadLimiter",
-                ]
-            )
-            # print(output)
-            output = subprocess.check_output(["sox", intermediate_file, paths.lecture_audio.os, "remix", "1"])
-            # print(output)
+def normalize_audio(paths):
+    normalization.normalize(
+        source=paths.rough_audio.os,
+        target=paths.lecture_audio.os,
+        channel=1,
+        highpass_frequency=100.0,
+        target_level=-20.0,
+        headroom=-0.1,
+        resolution=16,
+        level_smoothing=10.0,
+        level_threshold=-10.0,
+        limiter_lookahead=0.025
+    )
 
 
 def create_presentation(scene, paths, config):
