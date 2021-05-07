@@ -1,5 +1,7 @@
 import logging
 
+__all__ = ("ensure_audio_strips", "ensure_video_strips", "ensure_scene_strips", "cut_config")
+
 
 def ensure_audio_strips(sequence_editor, cuts, channel, base_name):
     for strip in __ensure_strips(

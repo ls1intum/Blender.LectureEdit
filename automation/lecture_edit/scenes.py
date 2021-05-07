@@ -1,6 +1,8 @@
 import os
 import bpy
-import sequences
+from . import sequences
+
+__all__ = ("scenes", "setup_sync_scene", "save_sync_scene", "setup_cut_scene", "save_cut_scene", "setup_slides_scene", "save_slides_scene", "setup_greenscreen_scenes", "save_greenscreen_scenes", "setup_merge_scene", "save_merge_scene")
 
 
 def scenes(paths):
@@ -315,11 +317,13 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
         strip.blend_type = "ALPHA_OVER"
         strip.blend_alpha = 0.5
         strip.frame_final_end = length
-    scene.frame_end = length
+        if os.path.isfile(paths.merge_config.os):
+            strip.mute = True
     # load the slide transitions and titles
     scene.timeline_markers.clear()
     setup_slide_markers(scene, config)
     # configure the render settings
+    scene.frame_end = length
     scene.render.image_settings.file_format = "FFMPEG"
     scene.render.ffmpeg.format = "MPEG4"
     scene.render.ffmpeg.codec = "H264"

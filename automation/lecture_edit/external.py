@@ -1,7 +1,9 @@
 import os
 import subprocess
-import normalization
-import pptx
+from . import normalization
+from . import pptx
+
+__all__ = ("adjust_slides_videos", "normalize_audio", "create_presentation", "initialize_speaker_visibility")
 
 
 def adjust_slides_videos(paths):

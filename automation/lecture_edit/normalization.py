@@ -8,6 +8,8 @@ import time
 import wave
 import numpy
 
+__all__ = ("normalize",)
+
 
 def normalize(source, target, channel, highpass_frequency, target_level, headroom, resolution, level_smoothing, level_threshold, limiter_lookahead, show_progress):
     stream, sampling_rate, length = read(path=source, channel=channel)

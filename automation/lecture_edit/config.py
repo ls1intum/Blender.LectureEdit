@@ -3,7 +3,9 @@ import json
 import logging
 import os
 import time
-import pptx
+from . import pptx
+
+__all__ = ("Config", )
 
 
 class Config:
@@ -77,6 +79,7 @@ class Config:
                 sync_reference = self.cuts("sync.speaker_audio")
             result = {}
             for cut_path, cut_cuts in cut_reference.items():
+                cut_cuts = cut_cuts.copy()
                 while cut_cuts:
                     cut_offset, cut_start, cut_end = cut_cuts.pop(0)
                     # find the coresponding part of the reference in the sync scene

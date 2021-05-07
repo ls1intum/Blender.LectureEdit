@@ -4,6 +4,8 @@ import re
 import xml.etree.ElementTree as ET
 import zipfile
 
+__all__ = ("create_presentation",)
+
 _xml_namespaces = {
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
     "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
