@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from .config import *
+from .external import *
 from .paths import *
 from .scenes import *
 

@@ -59,11 +59,14 @@ def save_cut_scene():
     sync_scene, cut_scene, slides_scene, greenscreen_scenes, merge_scene = lecture_edit.scenes(paths)
     lecture_edit.save_cut_scene(cut_scene, paths, config)
     lecture_edit.setup_cut_scene(cut_scene, paths, config)
+    if not os.path.isfile(paths.audio_config.os):
+        config.save(paths.audio_config, config.audio_config())
 
 
 def normalize_audio():
     paths = lecture_edit.Paths(bpy.data.filepath)
-    lecture_edit.normalize_audio(paths)
+    config = lecture_edit.Config(paths)
+    lecture_edit.normalize_audio(paths, config)
 
 
 def save_slides_scene():

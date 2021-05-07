@@ -35,18 +35,19 @@ def adjust_slides_videos(paths):
         output = subprocess.check_output(command)
 
 
-def normalize_audio(paths):
+def normalize_audio(paths, config):
+    settings = config.audio_config()
     normalization.normalize(
         source=paths.rough_audio.os,
         target=paths.lecture_audio.os,
-        channel=1,
-        highpass_frequency=100.0,
-        target_level=-20.0,
-        headroom=-0.1,
-        resolution=16,
-        level_smoothing=10.0,
-        level_threshold=-10.0,
-        limiter_lookahead=0.025,
+        channel=settings["channel"],
+        highpass_frequency=settings["highpass_frequency"],
+        target_level=settings["target_level"],
+        headroom=settings["headroom"],
+        resolution=settings["resolution"],
+        level_smoothing=settings["level_smoothing"],
+        level_threshold=settings["level_threshold"],
+        limiter_lookahead=settings["limiter_lookahead"],
         show_progress=False
     )
 

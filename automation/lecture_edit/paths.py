@@ -104,7 +104,6 @@ class Paths:
         self.lecture_handout = self.__file(self.final_path, f"{self.base_name}.pdf")
         # other
         self.speaker_placement = self.__file(self.common_path, "speaker_placement.png")
-        self.audio_reference = self.__file(self.common_path, "audio.json")
 
     def from_blender(self, path):
         for name in dir(self):

@@ -124,19 +124,20 @@ class Config:
         else:
             raise ValueError(f"Unknown name: {name}")
 
-    def audio_normalization(self, audio_file=None):
-        reference = max(
-            self.__config_get(self.__paths.audio_reference, "analysis"),
-            key=lambda r: datetime.datetime.fromisoformat(r["timestamp"]),
-        )
-        if audio_file is None:
-            audio_file = self.__paths.rough_audio
-        analyses = self.__config_get(self.__paths.audio_config, "analysis")
-        analyses = filter(lambda r: r["file"] == os.path.basename(audio_file.blender), analyses)
-        analysis = max(analyses, key=lambda r: datetime.datetime.fromisoformat(r["timestamp"]))
-        quantity = "active speech level [A]"
-        quantity = "level [A]"
-        return reference[quantity] / analysis[quantity]
+    def audio_config(self):
+        config = self.__config_get(self.__paths.audio_config)
+        if config is None:
+            config = {
+                "channel": 1,
+                "highpass_frequency": 100.0,
+                "target_level": -20.0,
+                "headroom": -0.1,
+                "resolution": 16,
+                "level_smoothing": 10.0,
+                "level_threshold": -10.0,
+                "limiter_lookahead": 0.025
+            }
+        return config
 
     def slide_transitions(self):
         return sorted(self.__config_get(self.__paths.slide_transitions, None, default=[]))
