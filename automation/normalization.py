@@ -9,7 +9,7 @@ import wave
 import numpy
 
 
-def normalize(source, target, channel, highpass_frequency, target_level, headroom, resolution, level_smoothing, level_threshold, limiter_lookahead):
+def normalize(source, target, channel, highpass_frequency, target_level, headroom, resolution, level_smoothing, level_threshold, limiter_lookahead, show_progress):
     stream, sampling_rate, length = read(path=source, channel=channel)
     if highpass_frequency:
         stream = highpass(stream, sampling_rate, frequency=highpass_frequency, order=2, regularization=0.0001)
@@ -18,7 +18,8 @@ def normalize(source, target, channel, highpass_frequency, target_level, headroo
     stream = level(stream, sampling_rate, smoothing_time=level_smoothing, threshold=level_threshold)
     stream = normalization(stream, level=target_level)
     stream = limiter(stream, sampling_rate, clip=headroom, lookahead=limiter_lookahead, hold=limiter_lookahead / 2)
-    stream = status(stream, length=length)
+    if show_progress:
+        stream = status(stream, length=length)
     write(stream, sampling_rate, path=target, bits=resolution)
 
 
@@ -53,10 +54,10 @@ def read(path, channel):
     else:
         def stream():
             with soundfile.SoundFile(path) as f:
-                chunk = f.read(chunk_size)
+                chunk = f.read(chunk_size, always_2d=True)
                 while len(chunk):
                     yield from chunk[:, channel-1]
-                    chunk = f.read(chunk_size)
+                    chunk = f.read(chunk_size, always_2d=True)
         with soundfile.SoundFile(path) as f:
             sampling_rate = float(f.samplerate)
             length = f.frames
@@ -240,6 +241,8 @@ def limiter(stream, sampling_rate, clip, lookahead, hold):
                 break
     buffer = numpy.roll(buffer, -i)
     gain_buffer = numpy.roll(gain_buffer, -i)
+    fade_out = numpy.blackman(2*length)[length:]
+    gain_buffer *= fade_out
     for sample, gain in zip(buffer, gain_buffer):
         yield sample * gain
 
@@ -264,7 +267,10 @@ def status(stream, length):
 
 
 def write(stream, sampling_rate, path, bits):
-    buffer_size = 2048
+    buffer_size = 2**14 * 8 // bits # buffer 16kB of the outbut file before writing them to the file
+    buffer = numpy.empty(buffer_size)
+    factor = 2 ** (bits - 1) - 1
+    code = {16: "h", 32: "i"}[bits]
     try:
         import soundfile
     except ImportError:
@@ -275,30 +281,32 @@ def write(stream, sampling_rate, path, bits):
             f.setnchannels(1)
             f.setsampwidth(bits // 8)
             f.setframerate(int(round(sampling_rate)))
-            buffer = numpy.empty(buffer_size)
-            factor = 2 ** (bits - 1) - 1
-            code = {16: "h", 32: "i"}[bits]
-            i = 1
-            while i:
-                i = 0
-                for i, sample in zip(range(len(buffer)), stream):
+            while True:
+                i = -1
+                for i, sample in zip(range(buffer_size), stream):
                     buffer[i] = sample
-                buffer *= factor
-                mask = f"<{i+1}{code}"
-                chunk = struct.pack(mask, *numpy.round(buffer[0:i+1]).astype(int))
-                f.writeframes(chunk)
+                if i >= 0:
+                    b = buffer[0:i+1]
+                    b *= factor
+                    mask = f"<{len(b)}{code}"
+                    integers = numpy.round(b).astype(int)
+                    chunk = struct.pack(mask, *integers)
+                    f.writeframes(chunk)
+                else:
+                    break
     else:
         file_format = {".wav": "WAV", ".flac": "FLAC"}[os.path.splitext(path)[1]]
         with soundfile.SoundFile(path, mode="w",
                                  samplerate=int(round(sampling_rate)), channels=1,
                                  format=file_format, subtype=f"PCM_{bits}") as f:
-            buffer = numpy.empty(buffer_size)
-            i = 1
-            while i:
-                i = 0
-                for i, sample in zip(range(len(buffer)), stream):
+            while True:
+                i = -1
+                for i, sample in zip(range(buffer_size), stream):
                     buffer[i] = sample
-                f.write(buffer[0:i+1])
+                if i >= 0:
+                    f.write(buffer[0:i+1])
+                else:
+                    break
 
 
 ##############################################
@@ -309,16 +317,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("source",
-                        nargs="?",
-                        help="the path to the audio file that shall be normalized",
-                        type=str,
-                        default="/home/jonas/Dokumente/Arbeit/TUM/Projekte/Cystinet/edX/Lectures/01 Life cycle/2 Evans - Risk factors/Intermediate/rough_audio.flac")
-    parser.add_argument("target",
-                        nargs="?",
-                        help="the path to where the normlized audio shall be saved",
-                        type=str,
-                        default="/home/jonas/Dokumente/Arbeit/TUM/Projekte/Cystinet/edX/Lectures/01 Life cycle/2 Evans - Risk factors/Intermediate/lecture_audio.flac")
+    parser.add_argument("source", help="the path to the audio file that shall be normalized", type=str)
+    parser.add_argument("target", help="the path to where the normlized audio shall be saved", type=str)
     parser.add_argument("-c", "--channel", help="the channel of the input audio file", type=int, default=1)
     parser.add_argument("-f", "--highpass", help="a frequency for a high pass filter", type=float, default=None)
     parser.add_argument("-l", "--level", help="the target level in db[FS]", type=float, default=-20.0)
@@ -338,4 +338,5 @@ if __name__ == "__main__":
               resolution=args.resolution,
               level_smoothing=args.smoothing,
               level_threshold=args.threshold,
-              limiter_lookahead=args.lookahead)
+              limiter_lookahead=args.lookahead,
+              show_progress=True)

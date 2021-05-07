@@ -30,7 +30,8 @@ def normalize_audio(paths):
         resolution=16,
         level_smoothing=10.0,
         level_threshold=-10.0,
-        limiter_lookahead=0.025
+        limiter_lookahead=0.025,
+        show_progress=False
     )
 
 
