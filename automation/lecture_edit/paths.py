@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import importlib.resources
 import os
 import pathlib
 
@@ -74,7 +75,6 @@ class Paths:
         self.source_path = Path("Source", self.__base_path)
         self.intermediate_path = Path("Intermediate", self.__base_path)
         self.final_path = Path("Final", self.__base_path)
-        self.common_path = self.__one_of("../../Common", "../Common")
         # source data
         self.presentation = self.__file(self.source_path, f"{self.base_name}.pptx")
         self.raw_slides_videos = self.__find_files(self.raw_path, f"{self.base_name} - Slides")
@@ -103,7 +103,7 @@ class Paths:
         self.lecture_video = self.__file(self.final_path, f"{self.base_name}.mp4")
         self.lecture_handout = self.__file(self.final_path, f"{self.base_name}.pdf")
         # other
-        self.speaker_placement = self.__file(self.common_path, "speaker_placement.png")
+        self.speaker_placement = self.__resource("speaker_placement.png")
 
     def from_blender(self, path):
         for name in dir(self):
@@ -166,9 +166,7 @@ class Paths:
         else:
             return []
 
-    def __one_of(self, *paths):
-        for p in paths:
-            path = Path(p, self.__base_path)
-            if os.path.exists(path.os):
-                return path
-        return None
+    def __resource(self, name):
+        with importlib.resources.path("lecture_edit.resources", name) as path:
+            relative = os.path.relpath(path, start=self.__base_path)
+            return Path(relative, self.__base_path)
