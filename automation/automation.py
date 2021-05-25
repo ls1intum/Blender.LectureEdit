@@ -31,13 +31,21 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 def setup():
     paths = lecture_edit.Paths(bpy.data.filepath)
     config = lecture_edit.Config(paths)
+    # create and initialize the scenes
     sync_scene, cut_scene, slides_scene, greenscreen_scenes, merge_scene = lecture_edit.scenes(paths)
     lecture_edit.setup_sync_scene(sync_scene, paths, config)
     lecture_edit.setup_cut_scene(cut_scene, paths, config)
-    lecture_edit.setup_slides_scene(slides_scene, paths, config)
+    if os.path.isfile(paths.sync_config.os) and os.path.isfile(paths.cut_config.os):
+        lecture_edit.setup_slides_scene(slides_scene, paths, config)
     if greenscreen_scenes:
         lecture_edit.setup_greenscreen_scenes(greenscreen_scenes, paths, config)
-    lecture_edit.setup_merge_scene(merge_scene, greenscreen_scenes, paths, config)
+    if os.path.isfile(paths.sync_config.os) and os.path.isfile(paths.cut_config.os):
+        lecture_edit.setup_merge_scene(merge_scene, greenscreen_scenes, paths, config)
+    # create missing config files
+    if not os.path.isfile(paths.audio_config.os):
+        config.save(paths.audio_config, config.audio_config())
+    if not os.path.isfile(paths.speaker_visibility.os) and os.path.isfile(paths.slide_transitions.os):
+        lecture_edit.initialize_speaker_visibility(merge_scene, paths, config)
 
 
 def convert_slides_videos():
@@ -105,3 +113,5 @@ def save_merge_scene():
     sync_scene, cut_scene, slides_scene, greenscreen_scenes, merge_scene = lecture_edit.scenes(paths)
     lecture_edit.save_merge_scene(merge_scene, paths, config)
     lecture_edit.setup_merge_scene(merge_scene, greenscreen_scenes, paths, config)
+    if not os.path.isfile(paths.speaker_visibility.os) and os.path.isfile(paths.slide_transitions.os):
+        lecture_edit.initialize_speaker_visibility(merge_scene, paths, config)
