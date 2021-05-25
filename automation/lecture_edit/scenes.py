@@ -253,7 +253,7 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
         )
     else:
         strips = sequences.ensure_audio_strips(
-            scene.sequence_editor, config.cuts("cut.speaker_videp"), channel=1, base_name="Audio"
+            scene.sequence_editor, config.cuts("cut.speaker_video"), channel=1, base_name="Audio"
         )
     for strip in strips:
         length = max(length, strip.frame_final_end)
