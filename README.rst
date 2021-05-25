@@ -33,6 +33,6 @@ It is planned to make them configurable in the future, however at the moment, it
 Documentation
 -------------
 
-You can find the project's documentation on `Read the docs <>`_
-Alternatively, you can `build the documentation locally <>`_ from the project's repository.
+You can find the project's documentation on `Read the docs <https://blenderlectureedit.readthedocs.io/en/latest/index.html>`_
+Alternatively, you can `build the documentation locally <https://blenderlectureedit.readthedocs.io/en/latest/developer/documentation.html>`_ from the project's repository.
 
