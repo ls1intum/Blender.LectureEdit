@@ -215,15 +215,16 @@ class Config:
 
     def speaker_visibility_fades(self, fps=25):
         fade = int(round(1.0 * fps / 2))
-        visibility = self.__config_get(self.__paths.speaker_visibility)
+        visibility = self.__config_get(self.__paths.speaker_visibility, default={})
         numbers = sorted(visibility.keys(), key=int)
-        show = visibility[numbers[0]][-1]
-        if not show:
-            yield (0, 0, show)
-        for number, frame in zip(numbers[1:], self.slide_transitions()):
-            if visibility[number][-1] != show:
-                show = visibility[number][-1]
-                yield (frame - fade, frame + fade, show)
+        if visibility:
+            show = visibility[numbers[0]][-1]
+            if not show:
+                yield (0, 0, show)
+            for number, frame in zip(numbers[1:], self.slide_transitions()):
+                if visibility[number][-1] != show:
+                    show = visibility[number][-1]
+                    yield (frame - fade, frame + fade, show)
 
     def __config_get(self, path, key=None, default=None):
         if os.path.isfile(path.os):
