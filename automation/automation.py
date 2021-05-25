@@ -40,9 +40,9 @@ def setup():
     lecture_edit.setup_merge_scene(merge_scene, greenscreen_scenes, paths, config)
 
 
-def adjust_slides_videos():
+def convert_slides_videos():
     paths = lecture_edit.Paths(bpy.data.filepath)
-    lecture_edit.adjust_slides_videos(paths)
+    lecture_edit.convert_slides_videos(paths)
 
 
 def save_sync_scene():

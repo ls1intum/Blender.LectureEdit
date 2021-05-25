@@ -17,10 +17,10 @@ import subprocess
 from . import normalization
 from . import pptx
 
-__all__ = ("adjust_slides_videos", "normalize_audio", "create_presentation", "initialize_speaker_visibility")
+__all__ = ("convert_slides_videos", "normalize_audio", "create_presentation", "initialize_speaker_visibility")
 
 
-def adjust_slides_videos(paths):
+def convert_slides_videos(paths):
     for path in paths.raw_slides_videos:
         filename = os.path.splitext(os.path.basename(path.os))[0]
         command = [
