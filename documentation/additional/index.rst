@@ -7,6 +7,7 @@ This chapter contains technical background knowledge about *Blender.LectureEdit*
    :maxdepth: 2
 
    slide_edits
+   default_settings
    file_links
    video_recording
 

@@ -18,6 +18,7 @@ import logging
 import os
 import time
 from . import pptx
+import default_settings
 
 __all__ = ("Config", )
 
@@ -36,6 +37,16 @@ class Config:
             json.dump(config, f, indent=4)
         self.__config_load_times[path] = time.time()
         self.__config_cache[path] = config
+
+    def defaults(self):
+        try:
+            import bpy
+        except ImportError:
+            pass
+        else:
+            if "default_settings.py" in bpy.data.texts:
+                return bpy.data.texts["default_settings.py"].as_module()
+        return default_settings
 
     def use_greenscreen(self):
         return bool(self.__paths.greenscreen_videos)
@@ -125,18 +136,16 @@ class Config:
             raise ValueError(f"Unknown name: {name}")
 
     def audio_config(self):
-        config = self.__config_get(self.__paths.audio_config)
-        if config is None:
-            config = {
-                "channel": 1,
-                "highpass_frequency": 100.0,
-                "target_level": -20.0,
-                "headroom": -0.1,
-                "resolution": 16,
-                "level_smoothing": 10.0,
-                "level_threshold": -10.0,
-                "limiter_lookahead": 0.025
-            }
+        config = self.__config_get(self.__paths.audio_config, default={})
+        defaults = self.defaults()
+        config.setdefault("channel", defaults.audio_channel)
+        config.setdefault("highpass_frequency", defaults.highpass_frequency)
+        config.setdefault("target_level", defaults.target_level)
+        config.setdefault("headroom", defaults.headroom)
+        config.setdefault("resolution", defaults.audio_resolution)
+        config.setdefault("level_smoothing", defaults.level_smoothing)
+        config.setdefault("level_threshold", defaults.level_threshold)
+        config.setdefault("limiter_lookahead", defaults.limiter_lookahead)
         return config
 
     def slide_transitions(self):
@@ -179,12 +188,7 @@ class Config:
                 yield (t - start) / fps, animations
                 frame = t
         else:
-            # compute a correction factor for the weird frame rate, at which Powerpoint exports their videos
-            # fmt:off
-            correction = 85918 / 70845  # the actual number of frames divided by the expected number of frames for Hugo's keynote (without any correction factor)
-            correction *= 70832 / 70845 # the actual number of frames divided by the expected number of frames for Hugo's keynote (after applying the previous correction factor)
-            # correction = 1
-            # fmt:on
+            correction = self.defaults().fps_correction
             durations = self.slide_durations(scene)
             slide_duration, animation_durations = next(durations)
             for next_ in durations:
@@ -197,24 +201,45 @@ class Config:
             ]
 
     def greenscreen_keying(self, path):
-        return self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("keying", {})
+        result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("keying", {})
+        defaults = self.defaults()
+        result.setdefault("Pre Blur", defaults.pre_blur)
+        result.setdefault("Screen Balance", defaults.screen_balance)
+        result.setdefault("Despill Factor", defaults.despill_factor)
+        result.setdefault("Despill Balance", defaults.despill_balance)
+        result.setdefault("Edge Kernel Radius", defaults.edge_kernel_radius)
+        result.setdefault("Edge Kernel Tolerance", defaults.edge_kernel_tolerance)
+        result.setdefault("Clip Black", defaults.clip_black)
+        result.setdefault("Clip White", defaults.clip_white)
+        result.setdefault("Dilate/Erode", defaults.dilate_erode)
+        result.setdefault("Feather Falloff", defaults.feather_falloff)
+        result.setdefault("Feather Distance", defaults.feather_distance)
+        result.setdefault("Post Blur", defaults.post_blur)
+        result.setdefault("Key Color", tuple(defaults.key_color) + (1.0,) * max(0, 4 - len(defaults.key_color)))
+        return result
 
     def color_correction(self, path):
-        return self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("color", {})
+        result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("color", {})
+        defaults = self.defaults()
+        result.setdefault("Hue", defaults.speaker_hue)
+        result.setdefault("Saturation", defaults.speaker_saturation)
+        result.setdefault("Value", defaults.speaker_value)
+        return result
 
     def speaker_placement(self, path):
         result = self.__config_get(self.__paths.merge_config, path.standard, default={})
-        result.setdefault("scale", 0.5)
-        result.setdefault("crop_left", 0)
-        result.setdefault("crop_right", 0)
-        result.setdefault("crop_bottom", 0)
-        result.setdefault("crop_top", 0)
-        result.setdefault("shift_x", 650)
-        result.setdefault("shift_y", -280)
+        defaults = self.defaults()
+        result.setdefault("scale", defaults.speaker_scale)
+        result.setdefault("shift_x", defaults.speaker_shift_x)
+        result.setdefault("shift_y", defaults.speaker_shift_y)
+        result.setdefault("crop_left", defaults.speaker_crop_left)
+        result.setdefault("crop_right", defaults.speaker_crop_right)
+        result.setdefault("crop_top", defaults.speaker_crop_top)
+        result.setdefault("crop_bottom", defaults.speaker_crop_bottom)
         return result
 
     def speaker_visibility_fades(self, fps=25):
-        fade = int(round(1.0 * fps / 2))
+        fade = int(round(self.defaults().speaker_fade_time * fps / 2))  # the number of frames at the beginning or end of the slide, that shall be affected by the fade (half the frames for the full fade)
         visibility = self.__config_get(self.__paths.speaker_visibility, default={})
         numbers = sorted(visibility.keys(), key=int)
         if visibility:

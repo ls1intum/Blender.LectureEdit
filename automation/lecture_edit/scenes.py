@@ -19,13 +19,14 @@ from . import sequences
 __all__ = ("scenes", "setup_sync_scene", "save_sync_scene", "setup_cut_scene", "save_cut_scene", "setup_slides_scene", "save_slides_scene", "setup_greenscreen_scenes", "save_greenscreen_scenes", "setup_merge_scene", "save_merge_scene")
 
 
-def scenes(paths):
+def scenes(paths, config):
+    defaults = config.defaults()
     result = (
-        __ensure_scene("Sync"),
-        __ensure_scene("Cut"),
-        __ensure_scene("Slides"),
-        [__ensure_scene(f"Greenscreen {i+1}") for i in range(len(paths.greenscreen_videos))],
-        __ensure_scene("Merge"),
+        __ensure_scene("Sync", defaults.width, defaults.height, defaults.fps),
+        __ensure_scene("Cut", defaults.width, defaults.height, defaults.fps),
+        __ensure_scene("Slides", defaults.width, defaults.height, defaults.fps),
+        [__ensure_scene(f"Greenscreen {i+1}", defaults.width, defaults.height, defaults.fps) for i in range(len(paths.greenscreen_videos))],
+        __ensure_scene("Merge", defaults.width, defaults.height, defaults.fps),
     )
     default_scene = bpy.data.scenes.get("Scene")
     if default_scene:
@@ -33,13 +34,13 @@ def scenes(paths):
     return result
 
 
-def __ensure_scene(name):
+def __ensure_scene(name, width, height, fps):
     scene = bpy.data.scenes.get(name)
     if scene is None:
         scene = bpy.data.scenes.new(name)
-    scene.render.resolution_x = 1920
-    scene.render.resolution_y = 1080
-    scene.render.fps = 25
+    scene.render.resolution_x = width
+    scene.render.resolution_y = height
+    scene.render.fps = fps
     scene.view_settings.view_transform = "Standard"
     return scene
 
@@ -200,19 +201,23 @@ def setup_greenscreen_scenes(scenes, paths, config):
         if clip.clip is None:
             clip.clip = bpy.data.movieclips.load(path.blender)
         kconfig = config.greenscreen_keying(path)
-        keying.despill_balance = kconfig.get("Despill Balance", 0.8)
-        keying.edge_kernel_radius = kconfig.get("Edge Kernel Radius", keying.edge_kernel_radius)
-        keying.edge_kernel_tolerance = kconfig.get("Edge Kernel Tolerance", 0.3)
-        keying.clip_black = kconfig.get("Clip Black", 0.2)
-        keying.clip_white = kconfig.get("Clip White", 0.9)
-        keying.dilate_distance = kconfig.get("Dilate/Erode", keying.dilate_distance)
-        keying.inputs["Key Color"].default_value.foreach_set(
-            kconfig.get("Key Color", keying.inputs["Key Color"].default_value)
-        )
+        keying.blur_pre = kconfig["Pre Blur"]
+        keying.screen_balance = kconfig["Screen Balance"]
+        keying.despill_factor = kconfig["Despill Factor"]
+        keying.despill_balance = kconfig["Despill Balance"]
+        keying.edge_kernel_radius = kconfig["Edge Kernel Radius"]
+        keying.edge_kernel_tolerance = kconfig["Edge Kernel Tolerance"]
+        keying.clip_black = kconfig["Clip Black"]
+        keying.clip_white = kconfig["Clip White"]
+        keying.dilate_distance = kconfig["Dilate/Erode"]
+        keying.feather_falloff = kconfig["Feather Falloff"]
+        keying.feather_distance = kconfig["Feather Distance"]
+        keying.blur_post = kconfig["Post Blur"]
+        keying.inputs["Key Color"].default_value.foreach_set(kconfig["Key Color"])
         cconfig = config.color_correction(path)
-        color.inputs["Saturation"].default_value = cconfig.get(
-            "Saturation", color.inputs["Saturation"].default_value
-        )
+        color.inputs["Hue"].default_value = cconfig["Hue"]
+        color.inputs["Saturation"].default_value = cconfig["Saturation"]
+        color.inputs["Value"].default_value = cconfig["Value"]
         # set the start and the end of the scene
         scene.frame_start = 0
         scene.frame_end = clip.clip.frame_duration
@@ -224,16 +229,24 @@ def save_greenscreen_scenes(scenes, paths, config):
         s_config = {"keying": {}, "color": {}}
         if "Keying" in scene.node_tree.nodes:
             node = scene.node_tree.nodes["Keying"]
+            s_config["keying"]["Pre Blur"] = node.blur_pre
+            s_config["keying"]["Screen Balance"] = node.screen_balance
             s_config["keying"]["Despill Balance"] = node.despill_balance
+            s_config["keying"]["Despill Factor"] = node.despill_factor
             s_config["keying"]["Edge Kernel Radius"] = node.edge_kernel_radius
             s_config["keying"]["Edge Kernel Tolerance"] = node.edge_kernel_tolerance
             s_config["keying"]["Clip Black"] = node.clip_black
             s_config["keying"]["Clip White"] = node.clip_white
             s_config["keying"]["Dilate/Erode"] = node.dilate_distance
+            s_config["keying"]["Feather Falloff"] = node.feather_falloff
+            s_config["keying"]["Feather Distance"] = node.feather_distance
+            s_config["keying"]["Post Blur"] = node.blur_post
             s_config["keying"]["Key Color"] = tuple(node.inputs["Key Color"].default_value)
         if "Hue Saturation Value" in scene.node_tree.nodes:
             node = scene.node_tree.nodes["Hue Saturation Value"]
+            s_config["color"]["Hue"] = node.inputs["Hue"].default_value
             s_config["color"]["Saturation"] = node.inputs["Saturation"].default_value
+            s_config["color"]["Value"] = node.inputs["Value"].default_value
         gs_config[path.standard] = s_config
     config.save(paths.greenscreen_config, gs_config)
 
@@ -291,12 +304,12 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
         effect_strip.use_uniform_scale = True
         effect_strip.scale_start_x = speaker_placement["scale"]
         effect_strip.scale_start_y = speaker_placement["scale"]
-        effect_strip.crop.min_x = speaker_placement["crop_left"]
-        effect_strip.crop.max_x = speaker_placement["crop_right"]
-        effect_strip.crop.min_y = speaker_placement["crop_bottom"]
-        effect_strip.crop.max_y = speaker_placement["crop_top"]
         effect_strip.transform.offset_x = speaker_placement["shift_x"]
         effect_strip.transform.offset_y = speaker_placement["shift_y"]
+        effect_strip.crop.min_x = speaker_placement["crop_left"]
+        effect_strip.crop.max_x = speaker_placement["crop_right"]
+        effect_strip.crop.max_y = speaker_placement["crop_top"]
+        effect_strip.crop.min_y = speaker_placement["crop_bottom"]
         # configure the fades for speaker visibility
         shown = True
         last_end = 0
@@ -337,16 +350,17 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
     scene.timeline_markers.clear()
     setup_slide_markers(scene, config)
     # configure the render settings
+    defaults = config.defaults()
     scene.frame_end = length
     scene.render.image_settings.file_format = "FFMPEG"
-    scene.render.ffmpeg.format = "MPEG4"
-    scene.render.ffmpeg.codec = "H264"
-    scene.render.ffmpeg.constant_rate_factor = "HIGH"
-    scene.render.ffmpeg.ffmpeg_preset = "GOOD"
-    scene.render.ffmpeg.audio_codec = "VORBIS"
-    scene.render.ffmpeg.audio_bitrate = 128
+    scene.render.ffmpeg.format = defaults.container
+    scene.render.ffmpeg.codec = defaults.video_codec
+    scene.render.ffmpeg.constant_rate_factor = defaults.video_quality
+    scene.render.ffmpeg.ffmpeg_preset = defaults.encoding_speed
+    scene.render.ffmpeg.audio_codec = defaults.audio_codec
+    scene.render.ffmpeg.audio_bitrate = defaults.audio_bitrate
     scene.render.ffmpeg.audio_channels = "MONO"
-    scene.render.ffmpeg.audio_mixrate = 44100
+    scene.render.ffmpeg.audio_mixrate = defaults.sampling_rate
     scene.render.filepath = paths.lecture_video.blender
 
 
@@ -360,11 +374,11 @@ def save_merge_scene(scene, paths, config):
         effect_strip = min([s for s in strips], key=lambda s: s.frame_final_start)
         result[path.standard] = {
             "scale": effect_strip.scale_start_x,
-            "crop_left": effect_strip.crop.min_x,
-            "crop_right": effect_strip.crop.max_x,
-            "crop_bottom": effect_strip.crop.min_y,
-            "crop_top": effect_strip.crop.max_y,
             "shift_x": effect_strip.transform.offset_x,
             "shift_y": effect_strip.transform.offset_y,
+            "crop_left": effect_strip.crop.min_x,
+            "crop_right": effect_strip.crop.max_x,
+            "crop_top": effect_strip.crop.max_y,
+            "crop_bottom": effect_strip.crop.min_y,
         }
     config.save(paths.merge_config, result)

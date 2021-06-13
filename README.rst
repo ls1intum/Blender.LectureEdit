@@ -27,9 +27,6 @@ Maturity of the project
 So far, *Blender.LectureEdit* is being used for the lecture videos in the `CYSTINET-Africa <https://www.cysti.net>`_ project.
 There, it has proven useful for a large number of edited videos, even though it leads to occasional crashes of *Blender* or fails to process *PowerPoint* files with timed slide transitions.
 
-The source code still contains a lot of hard-coded default settings.
-It is planned to make them configurable in the future, however at the moment, it requires changes in the source code to use *Blender.LectureEdit* for videos with a different resolution than 1920x1080 and a different frame rate than 25fps.
-
 Documentation
 -------------
 

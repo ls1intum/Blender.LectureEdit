@@ -20,7 +20,8 @@ from . import pptx
 __all__ = ("convert_slides_videos", "normalize_audio", "create_presentation", "initialize_speaker_visibility")
 
 
-def convert_slides_videos(paths):
+def convert_slides_videos(paths, config):
+    defaults = config.defaults()
     for path in paths.raw_slides_videos:
         filename = os.path.splitext(os.path.basename(path.os))[0]
         command = [
@@ -28,7 +29,7 @@ def convert_slides_videos(paths):
             "-i",
             str(path.os),
             "-vf",
-            "scale=1920x1080,fps=25",
+            f"scale={defaults.width}x{defaults.height},fps={defaults.fps}",
             str((paths.source_path / f"{filename}.mp4").os),
         ]
         print(" ".join(command))

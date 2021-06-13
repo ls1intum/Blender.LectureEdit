@@ -12,8 +12,9 @@ Conversion of frame rate and resolution
 ---------------------------------------
 
 .. note::
-   Currently, *Blender.LectureEdit* has a hard coded limitation, that it only works with 25fps and a resolution of 1920x1080.
-   While these values will remain the default setting, they will be configurable in the future.
+   By default, *Blender.LectureEdit* assumes, that the source videos are recorded with 25fps and a resolution of 1920x1080.
+   The target video will have the same parameters.
+   If you prefer different settings, you have to :ref:`adjust the default settings <default_settings>`.
 
 Sometimes, the source files have not been recorded with an identical frame rate and resolution.
 For example, in the CYSTINET-Africa project, all speaker videos have been recorded with a camera at 1920x1080 pixes and 25fps, while the slides were recorded with a screen capture, that has the 60fps frame rate and 3360x2100 resolution of the monitor.
