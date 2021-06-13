@@ -271,6 +271,8 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
     for strip in strips:
         length = max(length, strip.frame_final_end)
     # Slides
+    for strip in [s for s in scene.sequence_editor.sequences if s.channel == 2]:  # it is more reliable, if the slides video is purged before loading the current one
+        scene.sequence_editor.sequences.remove(strip)
     for strip in sequences.ensure_video_strips(
         scene.sequence_editor, {paths.presentation_video: [(0, 1, length)]}, channel=2, base_name="Slides"
     ):
