@@ -15,7 +15,7 @@ For this project, you need the following:
   There is a button to do that on the `project's GitHub page <https://github.com/ls1intum/Blender.LectureEdit>`_.
   It is recommended to use *git* for the download, so you can easily fetch the latest updates.
   However, if you are unfamiliar with *git*, you can also download and unpack the project's files as a zip-file.
-* You neet the *Microsoft PowerPoint* **pptx-file**, that contains the slides of the lecture, of which you want to produce the video.
+* You need the *Microsoft PowerPoint* **pptx-file**, that contains the slides of the lecture, of which you want to produce the video.
   Unfortunately, *Blender.LectureEdit* does not support slide decks, that have been created with other software such as *LibreOffice Impress*, *TeX* or *Apple Keynote*.
 * You need **recordings of a speaker**, who gives the lecture.
   This must be at least a video of the speaker.
@@ -39,7 +39,7 @@ This directory will contain the *Blender* project files and the following sub-di
 * ``Raw`` is an optional directory for files, that are related to the project, but are not processed during the video editing.
   These files could be a backup of the original slide deck from the speaker, while the one in the ``Source`` directory is edited to make room for the speaker in the video.
 
-The name of the *Blender* project file determines the file names of the files in the ``Source`` and the ``Final`` directory, while the files in the *Intermediate* directory are automatically created and have generic names..
+The name of the *Blender* project file determines the file names of the files in the ``Source`` and the ``Final`` directory, while the files in the *Intermediate* directory are automatically created and have generic names.
 For example, the file with the presentation slides must have the same file name as the *Blender* project file (except for the ``.pptx`` file extension).
 The video recordings of the speaker and the slides have to have a suffix in their file name, that indicates, which file is which:
 

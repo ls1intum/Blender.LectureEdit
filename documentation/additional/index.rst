@@ -9,5 +9,6 @@ This chapter contains technical background knowledge about *Blender.LectureEdit*
    slide_edits
    default_settings
    file_links
+   blender
    video_recording
 

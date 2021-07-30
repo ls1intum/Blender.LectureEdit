@@ -9,7 +9,7 @@ Setting up the green screen processing
 The configuration for processing the green screen recording can be done at any time of the video editing.
 It does not depend on the synchronization of the source files, the cutting or the marking of the slide transitions.
 
-In order to configure the green screen processing, switch to one of the *Greenscreen* scenes.
+In order to configure the green screen processing, :ref:`switch to <blender_documentation_scenes>` one of the *Greenscreen* scenes.
 If the recording of the speaker is split to multiple files, the processing of each file has to be done individually, and has therefore its own *Greenscreen* scene.
 Also, switch to the *Compositing* workspace.
 
@@ -108,9 +108,14 @@ Adjusting the color
 -------------------
 
 *Blender.LectureEdit* automatically sets up a *Hue Saturation Value* box in the processing chain for the green screen video.
-This is, because in natuarlly colored videos, the speakers often look pale in front of their colorful slides.
+This is, because in naturally colored videos, the speakers often look pale in front of their colorful slides.
 You can compensate this effect by slightly increasing the saturation.
 Sometimes, a tiny reduction of the *Value* setting leads to a darker image, that looks better in front of the slides.
+
+Before the *Hue Saturation Value* box, there is a *Color Correction* box, whose processing is disabled by default.
+Sometimes, it is necessary to adjust specific colors in the speaker video, which is possible with this processing step.
+An example for this is a recording, in which the white balance failed, which led to a blue tint in the speaker's normally black hair.
+This issue could be mitigated by enabling the processing of the blue color channel in the *Color Correction* box and reducing *Gain* and *Saturation* in the *Shadows* of that color channel.
 
 If you combine multiple videos of the speaker for a lecture, make sure, that the color adjustments are compatible.
 

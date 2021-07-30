@@ -42,7 +42,7 @@ The following command sets up the project as far as it can.
 >>> automation.setup()
 
 Since the synchronization is the very first step, this command does not get very far, but at least, it loads the audio tracks of the source files into the *Sync* scene.
-So, now you can navigate to the *Sync* scene and use *Blender*'s sequencer to align those files.
+So, now you can :ref:`navigate <blender_documentation_scenes>` to the *Sync* scene and use *Blender*'s sequencer to align those files.
 
 Here is a screenshot, how this might look like:
 

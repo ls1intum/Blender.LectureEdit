@@ -3,7 +3,7 @@
 Marking the slide transitions
 =============================
 
-After synchronizing the source files and cutting the video, it is possible to set up the *Slides* scene, in which you can mark the points in time, where a slide transition occurs or an animation starts.
+After synchronizing the source files and cutting the video, it is possible to set up the *Slides* :ref:`scene <blender_documentation_scenes>`, in which you can mark the points in time, where a slide transition occurs or an animation starts.
 For this, re-run the setup command.
 
 >>> automation.setup()
@@ -18,7 +18,7 @@ You can now watch the video and create a marker (by pressing ``m``, when the mou
 In order to see the video, you have to enable a preview.
 You can show the video behind the sequencer by checking the *Preview as Backdrop* option in the *View* menu of the sequencer.
 Or you can replace the text editor with the *Video Sequencer* and select the video preview there.
-The following screenshot shows the two options.
+The following screenshot shows how to enable the two options.
 Also note the dashed vertical lines in the sequencer, that visualize the markers for the slide transitions and animations.
 
 .. image:: /images/blender_slides_setup.png
