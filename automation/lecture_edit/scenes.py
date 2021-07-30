@@ -57,17 +57,17 @@ def setup_sync_scene(scene, paths, config):
             channel=channel,
             base_name="Speaker Audio",
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
         channel += 1
     for strip in sequences.ensure_audio_strips(
         scene.sequence_editor, config.cuts("sync.speaker_video"), channel=channel, base_name="Speaker Video"
     ):
-        length = max(length, strip.frame_final_end)
+        length = max(length, strip.frame_final_end - 1)
     channel += 1
     for strip in sequences.ensure_audio_strips(
         scene.sequence_editor, config.cuts("sync.slides_video"), channel=channel, base_name="Slides Video"
     ):
-        length = max(length, strip.frame_final_end)
+        length = max(length, strip.frame_final_end - 1)
     scene.frame_end = length
 
 
@@ -93,12 +93,12 @@ def setup_cut_scene(scene, paths, config):
         for strip in sequences.ensure_audio_strips(
             scene.sequence_editor, config.cuts("cut.speaker_audio"), channel=1, base_name="Speaker Audio"
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
     else:
         for strip in sequences.ensure_audio_strips(
             scene.sequence_editor, config.cuts("cut.speaker_video"), channel=1, base_name="Speaker Video"
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
     scene.frame_end = length
 
 
@@ -117,17 +117,17 @@ def setup_slides_scene(scene, paths, config):
         for strip in sequences.ensure_audio_strips(
             scene.sequence_editor, {paths.lecture_audio: [(0, 1, None)]}, channel=1, base_name="Lecture Audio"
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
     elif os.path.isfile(paths.rough_audio.os):
         for strip in sequences.ensure_audio_strips(
             scene.sequence_editor, {paths.rough_audio: [(0, 1, None)]}, channel=1, base_name="Rough Audio"
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
     if paths.slides_videos:
         for strip in sequences.ensure_video_strips(
             scene.sequence_editor, config.cuts("slides.slides_video"), channel=2, base_name="Slides Video"
         ):
-            length = max(length, strip.frame_final_end)
+            length = max(length, strip.frame_final_end - 1)
     scene.frame_end = length
     setup_slide_markers(scene, config)
 
@@ -329,14 +329,14 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
             scene.sequence_editor, config.cuts("cut.speaker_video"), channel=1, base_name="Audio"
         )
     for strip in strips:
-        length = max(length, strip.frame_final_end)
+        length = max(length, strip.frame_final_end - 1)
     # Slides
     for strip in [s for s in scene.sequence_editor.sequences if s.channel == 2]:  # it is more reliable, if the slides video is purged before loading the current one
         scene.sequence_editor.sequences.remove(strip)
     for strip in sequences.ensure_video_strips(
         scene.sequence_editor, {paths.presentation_video: [(0, 1, length)]}, channel=2, base_name="Slides"
     ):
-        length = max(length, strip.frame_final_end)
+        length = max(length, strip.frame_final_end - 1)
     # Speaker
     for strip in [s for s in scene.sequence_editor.sequences if s.channel == 4]:
         scene.sequence_editor.sequences.remove(strip)
@@ -355,7 +355,7 @@ def setup_merge_scene(scene, greenscreen_scenes, paths, config):
     for i, strip in enumerate(strips, start=1):
         # configure the movie/scene strip
         strip.mute = True
-        length = max(length, strip.frame_final_end)
+        length = max(length, strip.frame_final_end - 1)
         # create the effect strip for tranlating and cropping
         speaker_placement = config.speaker_placement(paths.from_strip(strip))
         effect_strip = scene.sequence_editor.sequences.new_effect(
