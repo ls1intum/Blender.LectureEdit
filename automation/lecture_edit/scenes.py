@@ -160,31 +160,38 @@ def setup_greenscreen_scenes(scenes, paths, config):
         node_types = [
             ("Movie Clip", "CompositorNodeMovieClip"),
             ("Keying", "CompositorNodeKeying"),
+            ("Color Correction", "CompositorNodeColorCorrection"),
             ("Hue Saturation Value", "CompositorNodeHueSat"),
             ("Alpha Convert", "CompositorNodePremulKey"),
             ("Composite", "CompositorNodeComposite"),
+            ("Switch", "CompositorNodeSwitch"),
             ("Split Viewer", "CompositorNodeSplitViewer"),
         ]
-        clip, keying, color, converter, composite, viewer = (
+        clip, keying, color_correction, hsv, converter, composite, switch, viewer = (
             nodes[n] if n in nodes else nodes.new(t) for n, t in node_types
         )
-        clip.location = (-700, 590)
-        keying.location = (-330, 580)
-        color.location = (-40, 605)
-        converter.location = (250, 630)
-        composite.location = (530, 630)
-        viewer.location = (250, 340)
+        clip.location = (-800, 350)
+        keying.location = (-530, 580)
+        color_correction.location = (-240, 800)
+        hsv.location = (300, 630)
+        converter.location = (550, 630)
+        composite.location = (800, 630)
+        switch.location = (580, 250)
+        viewer.location = (800, 140)
         # delete surplus nodes
         for node in [node for node in nodes if node.name not in dict(node_types)]:
             nodes.remove(node)
         # create the connections
         connections = [
             (clip.outputs["Image"], keying.inputs["Image"]),
-            (keying.outputs["Matte"], viewer.inputs[1]),
-            (keying.outputs["Image"], color.inputs["Image"]),
-            (color.outputs["Image"], converter.inputs["Image"]),
+            (clip.outputs["Image"], viewer.inputs[1]),
+            (keying.outputs["Matte"], switch.inputs["On"]),
+            (keying.outputs["Image"], color_correction.inputs["Image"]),
+            (color_correction.outputs["Image"], hsv.inputs["Image"]),
+            (hsv.outputs["Image"], converter.inputs["Image"]),
+            (hsv.outputs["Image"], switch.inputs["Off"]),
             (converter.outputs["Image"], composite.inputs["Image"]),
-            (color.outputs["Image"], viewer.inputs[0]),
+            (switch.outputs["Image"], viewer.inputs[0]),
         ]
         for fr, to in connections:
             for c in scene.node_tree.links:
@@ -213,11 +220,37 @@ def setup_greenscreen_scenes(scenes, paths, config):
         keying.feather_falloff = kconfig["Feather Falloff"]
         keying.feather_distance = kconfig["Feather Distance"]
         keying.blur_post = kconfig["Post Blur"]
-        keying.inputs["Key Color"].default_value.foreach_set(kconfig["Key Color"])
+        keying.inputs["Key Color"].default_value.foreach_set(tuple(kconfig["Key Color"]) + (1.0,) * (4 - len(kconfig["Key Color"])))
+        sconfig = config.hue_saturation_value(path)
+        hsv.inputs["Hue"].default_value = sconfig["Hue"]
+        hsv.inputs["Saturation"].default_value = sconfig["Saturation"]
+        hsv.inputs["Value"].default_value = sconfig["Value"]
         cconfig = config.color_correction(path)
-        color.inputs["Hue"].default_value = cconfig["Hue"]
-        color.inputs["Saturation"].default_value = cconfig["Saturation"]
-        color.inputs["Value"].default_value = cconfig["Value"]
+        color_correction.red = cconfig["Red"]
+        color_correction.green = cconfig["Green"]
+        color_correction.blue = cconfig["Blue"]
+        color_correction.master_saturation = cconfig["Master Saturation"]
+        color_correction.master_contrast = cconfig["Master Contrast"]
+        color_correction.master_gamma = cconfig["Master Gamma"]
+        color_correction.master_gain = cconfig["Master Gain"]
+        color_correction.master_lift = cconfig["Master Lift"]
+        color_correction.highlights_saturation = cconfig["Highlights Saturation"]
+        color_correction.highlights_contrast = cconfig["Highlights Contrast"]
+        color_correction.highlights_gamma = cconfig["Highlights Gamma"]
+        color_correction.highlights_gain = cconfig["Highlights Gain"]
+        color_correction.highlights_lift = cconfig["Highlights Lift"]
+        color_correction.midtones_saturation = cconfig["Midtones Saturation"]
+        color_correction.midtones_contrast = cconfig["Midtones Contrast"]
+        color_correction.midtones_gamma = cconfig["Midtones Gamma"]
+        color_correction.midtones_gain = cconfig["Midtones Gain"]
+        color_correction.midtones_lift = cconfig["Midtones Lift"]
+        color_correction.shadows_saturation = cconfig["Shadows Saturation"]
+        color_correction.shadows_contrast = cconfig["Shadows Contrast"]
+        color_correction.shadows_gamma = cconfig["Shadows Gamma"]
+        color_correction.shadows_gain = cconfig["Shadows Gain"]
+        color_correction.shadows_lift = cconfig["Shadows Lift"]
+        color_correction.midtones_start = cconfig["Midtones Start"]
+        color_correction.midtones_end = cconfig["Midtones End"]
         # set the start and the end of the scene
         scene.frame_start = 0
         scene.frame_end = clip.clip.frame_duration
@@ -226,7 +259,7 @@ def setup_greenscreen_scenes(scenes, paths, config):
 def save_greenscreen_scenes(scenes, paths, config):
     gs_config = {}
     for scene, path in zip(scenes, paths.greenscreen_videos):
-        s_config = {"keying": {}, "color": {}}
+        s_config = {"keying": {}, "color": {}, "color correction": {}}
         if "Keying" in scene.node_tree.nodes:
             node = scene.node_tree.nodes["Keying"]
             s_config["keying"]["Pre Blur"] = node.blur_pre
@@ -241,12 +274,39 @@ def save_greenscreen_scenes(scenes, paths, config):
             s_config["keying"]["Feather Falloff"] = node.feather_falloff
             s_config["keying"]["Feather Distance"] = node.feather_distance
             s_config["keying"]["Post Blur"] = node.blur_post
-            s_config["keying"]["Key Color"] = tuple(node.inputs["Key Color"].default_value)
+            s_config["keying"]["Key Color"] = tuple(node.inputs["Key Color"].default_value)[0:3]
         if "Hue Saturation Value" in scene.node_tree.nodes:
             node = scene.node_tree.nodes["Hue Saturation Value"]
             s_config["color"]["Hue"] = node.inputs["Hue"].default_value
             s_config["color"]["Saturation"] = node.inputs["Saturation"].default_value
             s_config["color"]["Value"] = node.inputs["Value"].default_value
+        if "Color Correction" in scene.node_tree.nodes:
+            node = scene.node_tree.nodes["Color Correction"]
+            s_config["color correction"]["Red"] = node.red
+            s_config["color correction"]["Green"] = node.green
+            s_config["color correction"]["Blue"] = node.blue
+            s_config["color correction"]["Master Saturation"] = node.master_saturation
+            s_config["color correction"]["Master Contrast"] = node.master_contrast
+            s_config["color correction"]["Master Gamma"] = node.master_gamma
+            s_config["color correction"]["Master Gain"] = node.master_gain
+            s_config["color correction"]["Master Lift"] = node.master_lift
+            s_config["color correction"]["Highlights Saturation"] = node.highlights_saturation
+            s_config["color correction"]["Highlights Contrast"] = node.highlights_contrast
+            s_config["color correction"]["Highlights Gamma"] = node.highlights_gamma
+            s_config["color correction"]["Highlights Gain"] = node.highlights_gain
+            s_config["color correction"]["Highlights Lift"] = node.highlights_lift
+            s_config["color correction"]["Midtones Saturation"] = node.midtones_saturation
+            s_config["color correction"]["Midtones Contrast"] = node.midtones_contrast
+            s_config["color correction"]["Midtones Gamma"] = node.midtones_gamma
+            s_config["color correction"]["Midtones Gain"] = node.midtones_gain
+            s_config["color correction"]["Midtones Lift"] = node.midtones_lift
+            s_config["color correction"]["Shadows Saturation"] = node.shadows_saturation
+            s_config["color correction"]["Shadows Contrast"] = node.shadows_contrast
+            s_config["color correction"]["Shadows Gamma"] = node.shadows_gamma
+            s_config["color correction"]["Shadows Gain"] = node.shadows_gain
+            s_config["color correction"]["Shadows Lift"] = node.shadows_lift
+            s_config["color correction"]["Midtones Start"] = node.midtones_start
+            s_config["color correction"]["Midtones End"] = node.midtones_end
         gs_config[path.standard] = s_config
     config.save(paths.greenscreen_config, gs_config)
 

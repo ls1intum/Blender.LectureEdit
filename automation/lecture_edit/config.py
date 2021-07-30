@@ -218,12 +218,42 @@ class Config:
         result.setdefault("Key Color", tuple(defaults.key_color) + (1.0,) * max(0, 4 - len(defaults.key_color)))
         return result
 
-    def color_correction(self, path):
+    def hue_saturation_value(self, path):
         result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("color", {})
         defaults = self.defaults()
         result.setdefault("Hue", defaults.speaker_hue)
         result.setdefault("Saturation", defaults.speaker_saturation)
         result.setdefault("Value", defaults.speaker_value)
+        return result
+
+    def color_correction(self, path):
+        result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("color correction", {})
+        defaults = self.defaults()
+        result.setdefault("Red", defaults.enable_color_correction)
+        result.setdefault("Green", defaults.enable_color_correction)
+        result.setdefault("Blue", defaults.enable_color_correction)
+        result.setdefault("Master Saturation", 1.0)
+        result.setdefault("Master Contrast", 1.0)
+        result.setdefault("Master Gamma", 1.0)
+        result.setdefault("Master Gain", 1.0)
+        result.setdefault("Master Lift", 0.0)
+        result.setdefault("Highlights Saturation", 1.0)
+        result.setdefault("Highlights Contrast", 1.0)
+        result.setdefault("Highlights Gamma", 1.0)
+        result.setdefault("Highlights Gain", 1.0)
+        result.setdefault("Highlights Lift", 0.0)
+        result.setdefault("Midtones Saturation", 1.0)
+        result.setdefault("Midtones Contrast", 1.0)
+        result.setdefault("Midtones Gamma", 1.0)
+        result.setdefault("Midtones Gain", 1.0)
+        result.setdefault("Midtones Lift", 0.0)
+        result.setdefault("Shadows Saturation", 1.0)
+        result.setdefault("Shadows Contrast", 1.0)
+        result.setdefault("Shadows Gamma", 1.0)
+        result.setdefault("Shadows Gain", 1.0)
+        result.setdefault("Shadows Lift", 0.0)
+        result.setdefault("Midtones Start", 0.2)
+        result.setdefault("Midtones End", 0.7)
         return result
 
     def speaker_placement(self, path):

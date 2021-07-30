@@ -48,10 +48,11 @@ post_blur = 0
 key_color = (1.0, 1.0, 1.0)
 
 # hue, saturation and value settings for the post-processing of the green screen video
-# (as specified in the hue-saturation-value node in the Greenscreen scenes' compositing view)
+# (as specified in the color-correction- and hue-saturation-value-nodes in the Greenscreen scenes' compositing view)
 speaker_hue = 0.5
 speaker_saturation = 1.0
 speaker_value = 1.0
+enable_color_correction = False  # only affects the color-correction node, not the hue-saturation-value node
 
 # settings for the speaker placement in the Merge scene
 # (as set for the speaker track in the Merge scene)
