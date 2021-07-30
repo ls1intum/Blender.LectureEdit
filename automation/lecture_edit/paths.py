@@ -32,7 +32,7 @@ class Path:
                 os_path = (os_path.parent / path).resolve()
         self.blender = "//" + os.path.relpath(os_path, start=base_path)
         self.os = os_path
-        self.standard = relative_path
+        self.standard = relative_path.replace(os.sep, "/")
         self.__base_path = base_path
 
     def __hash__(self):
@@ -119,6 +119,7 @@ class Paths:
         raise ValueError(f"Path object of blender path {path} could not be found")
 
     def from_standard(self, path):
+        path = path.replace(os.sep, "/")
         for name in dir(self):
             if not name.startswith("_"):
                 obj = getattr(self, name)
