@@ -27,7 +27,7 @@ Also note the dashed vertical lines in the sequencer, that visualize the markers
 If you zoom in on the labels for the markers, you can see, that these are texts from the slides.
 Whenever you save the markers with the command ...
 
->>> automation.save_sync_scene()
+>>> automation.save_slides_scene()
 
 ... the labels for the markers are changed to be the first bit of text, that *Blender.LectureEdit* finds on the slides.
 Usually, this is the slide title, but sometimes, it is some other text or even empty, if the slide does not contain text at all.
