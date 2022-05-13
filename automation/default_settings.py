@@ -19,14 +19,16 @@ width = 1920    # the width in number of pixels of the target video
 height = 1080   # the height in number of pixels of the target video
 
 # audio normalization settings
-audio_channel = 1           # the channel of the rough audio file, that shall be used as the speaker audio track
-highpass_frequency = 100.0  # the high pass frequency in Hz below which the frequencies are attenuated (0 for disabling the high pass)
-target_level = -20.0        # the target level of the normalization in dB[FS]
-headroom = -0.1             # the maximum level of the limiter in db[FS]
-audio_resolution = 16       # the resolution of the resulting audio file in bits per sample
-level_smoothing = 10.0      # the smoothing time in seconds for the normalization
-level_threshold = -10.0     # a threshold in dB of the current level, below which a part is regarded as silent and ignored in the normalization
-limiter_lookahead = 0.025   # the lookahead time in seconds of the limiter
+audio_channel = 1               # the channel of the rough audio file, that shall be used as the speaker audio track
+highpass_frequencies = [100.0]  # frequencies of high pass filters in Hz below which the frequencies are attenuated. Specify multiple frequencies for a sharper roll-off
+notch_filter_frequencies = []   # frequencies for notch filters, that attenuate specific frequencies. Can be used to attenuate hum. Consider specifying a filter for the base frequency of the hum (e.g. 50Hz) and its low integer multiples, especially the odd ones (e.g. 150Hz and 250Hz)
+notch_filter_q_factor = 10      # the Q-factor for the filter. Higher values result in a greater attenuation of a narrower frequency band
+target_level = -20.0            # the target level of the normalization in dB[FS]
+headroom = -0.1                 # the maximum level of the limiter in db[FS]
+audio_resolution = 16           # the resolution of the resulting audio file in bits per sample
+level_smoothing = 10.0          # the smoothing time in seconds for the normalization
+level_threshold = -10.0         # a threshold in dB of the current level, below which a part is regarded as silent and ignored in the normalization
+limiter_lookahead = 0.025       # the lookahead time in seconds of the limiter
 
 # settings for the export of the slide transitions to PowerPoint
 fps_correction = (fps / 25) * (85918 / 70845) * (70832 / 70845)  # a correction factor for the slide transition times, so the video rendered by PowerPoint can be treated as if it had the desired frame rate

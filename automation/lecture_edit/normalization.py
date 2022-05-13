@@ -25,10 +25,12 @@ import numpy
 __all__ = ("normalize",)
 
 
-def normalize(source, target, channel, highpass_frequency, target_level, headroom, resolution, level_smoothing, level_threshold, limiter_lookahead, show_progress):
+def normalize(source, target, channel, highpass_frequencies, notch_filter_frequencies, notch_filter_q_factor, target_level, headroom, resolution, level_smoothing, level_threshold, limiter_lookahead, show_progress):
     stream, sampling_rate, length = read(path=source, channel=channel)
-    if highpass_frequency:
-        stream = highpass(stream, sampling_rate, frequency=highpass_frequency, order=2, regularization=0.0001)
+    for frequency in highpass_frequencies:
+        stream = highpass(stream, sampling_rate, frequency=frequency, order=2, regularization=0.0001)
+    for frequency in notch_filter_frequencies:
+        stream = notch_filter(stream, sampling_rate, frequency, q_factor=notch_filter_q_factor, regularization=0.0001)
     stream = a_weighting(stream, sampling_rate)
     stream = activity(stream, sampling_rate, smoothing_time=0.03)
     stream = level(stream, sampling_rate, smoothing_time=level_smoothing, threshold=level_threshold)
@@ -130,6 +132,22 @@ def highpass(stream, sampling_rate, frequency, order, regularization):
     yield from _apply_iir_filter(stream, zb, za)
 
 
+def notch_filter(stream, sampling_rate, frequency, q_factor, regularization):
+    # compute the filter coefficients for a time-continuous notch filter
+    w = 2 * math.pi * frequency
+    a = (1, w / q_factor, w ** 2)
+    b = (1, 0, w ** 2)
+    # transform the coefficients with the bilinear transform
+    fs = sampling_rate
+    q = 1.0 - regularization
+    formula = lambda x: (4 * x[0] * fs**2 - 2 * x[1] * fs * q + x[2] * q**2, -8 * x[0] * fs**2 + 2 * x[1] * fs * (q - 1) + 2 * x[2] * q, 4 * x[0] * fs**2 + 2 * x[1] * fs + x[2])
+    za, zb = (formula(x) for x in (a, b))
+    zb = numpy.divide(zb, za[-1])
+    za = numpy.divide(za, za[-1])
+    # apply the filter to the stream
+    yield from _apply_iir_filter(stream, zb, za)
+
+
 def a_weighting(stream, sampling_rate):
     # compute the zeros and poles for a time-continuous A-weighting filter
     fr = 1000.0  # 1000Hz in IEC 61672-1
@@ -198,7 +216,7 @@ def level(stream, sampling_rate, smoothing_time, threshold):
 def normalization(stream, level):
     target_level = 10.0 ** (level / 20.0)
     for output, side_chain in stream:
-        yield output * target_level / side_chain  
+        yield output * target_level / side_chain
 
 
 def limiter(stream, sampling_rate, clip, lookahead, hold):
@@ -336,7 +354,9 @@ if __name__ == "__main__":
     parser.add_argument("source", help="the path to the audio file that shall be normalized", type=str)
     parser.add_argument("target", help="the path to where the normlized audio shall be saved", type=str)
     parser.add_argument("-c", "--channel", help="the channel of the input audio file", type=int, default=1)
-    parser.add_argument("-f", "--highpass", help="a frequency for a high pass filter", type=float, default=None)
+    parser.add_argument("-f", "--highpass", help="a frequency of a high pass filter", type=float, default=None)
+    parser.add_argument("-h", "--humfilter", help="a frequency of hum, that shall be removed (usually 50Hz or 60Hz)", type=float, default=None)
+    parser.add_argument("-q", "--q_factor", help="the Q-factor of the hum filtering", type=float, default=10.0)
     parser.add_argument("-l", "--level", help="the target level in db[FS]", type=float, default=-20.0)
     parser.add_argument("-p", "--headroom", help="the headroom in dB[FS] after limiting", type=float, default=-0.1)
     parser.add_argument("-r", "--resolution", help="the resolution in bits of the target file", type=int, default=16)
@@ -348,7 +368,9 @@ if __name__ == "__main__":
     normalize(source=args.source,
               target=args.target,
               channel=args.channel,
-              highpass_frequency=args.highpass,
+              highpass_frequencies=[args.highpass] if args.highpass else [],
+              notch_filter_frequencies=numpy.multiply(args.humfilter, [1, 3, 5]) if args.humfilter else [],
+              notch_filter_q_factor=args.q_factor,
               target_level=args.level,
               headroom=args.headroom,
               resolution=args.resolution,

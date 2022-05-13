@@ -137,9 +137,17 @@ class Config:
 
     def audio_config(self):
         config = self.__config_get(self.__paths.audio_config, default={})
+        # compatibility with older config files from a time, when there was only one high pass frequency
+        if "highpass_frequency" in config:
+            highpass = config["highpass_frequency"]
+            config["highpass_frequencies"] = [highpass] if highpass else []
+            del config["highpass_frequency"]
+        # get the default values for all values, that are not specified in the config file
         defaults = self.defaults()
         config.setdefault("channel", defaults.audio_channel)
-        config.setdefault("highpass_frequency", defaults.highpass_frequency)
+        config.setdefault("highpass_frequencies", defaults.highpass_frequencies)
+        config.setdefault("notch_filter_frequencies", defaults.notch_filter_frequencies)
+        config.setdefault("notch_filter_q_factor", defaults.notch_filter_q_factor)
         config.setdefault("target_level", defaults.target_level)
         config.setdefault("headroom", defaults.headroom)
         config.setdefault("resolution", defaults.audio_resolution)
