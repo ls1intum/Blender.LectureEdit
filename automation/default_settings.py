@@ -31,7 +31,7 @@ level_threshold = -10.0         # a threshold in dB of the current level, below 
 limiter_lookahead = 0.025       # the lookahead time in seconds of the limiter
 
 # settings for the export of the slide transitions to PowerPoint
-fps_correction = (fps / 25) * (85918 / 70845) * (70832 / 70845)  # a correction factor for the slide transition times, so the video rendered by PowerPoint can be treated as if it had the desired frame rate
+fps_correction = (25 / fps) * (85918 / 70845) * (70832 / 70845)  # a correction factor for the slide transition times, so the video rendered by PowerPoint can be treated as if it had the desired frame rate
 
 # settings for cropping out the green screen
 # (as specified in the keying node in the Greenscreen scenes' compositing view)
