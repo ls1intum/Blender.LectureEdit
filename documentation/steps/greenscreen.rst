@@ -41,6 +41,34 @@ Note, that below the area with the processing boxes, there is a *Dope Sheet*, wh
 It is highly recommended to double-check each of the settings, that are discussed below, at different points in the video.
 
 
+Compensating the distortions due to the camera position
+-------------------------------------------------------
+
+With most recordings, you can skip this step and leave the *Lens Distortion* box untouched.
+However, sometimes, an unfortunate positioning of the camera can lead to a distorted image of the speaker.
+For example, if the camera is too close to the speaker, the extreme wide angle of the camera lens give the video almost a fish-eye like perspective, that makes objects in the center of the image appear disproportionally large.
+Another issue, that might require compensation is, when the camera was filming the speaker from below, so that their head appears unusually small in comparison to the torso.
+
+For compensating the distortion, the processing of the greenscreen video offers two boxes.
+The first one is called *Corner Pin* and allows to change the position of the input video's corners in the output video.
+There are three parameters for each of the corners, where the first is the x-axis position along the width of the video, the second is the y-axis position along the height of the video and the third parameter is ignored.
+The intended use for this processing box is to move either the upper or the lower corners a little bit inside to compensate for a camera position, that filmed the speaker either from above or from below.
+The required adjustments are usually very small.
+In one example, where the speaker was filmed from below by a camera, that was sitting on the speaker's desk, the compensated x-coordinates for the lower corners were 0.03 and 0.97 respectively.
+
+The second box for equalizing a distorted image is the *Lens Distortion* box.
+The most important parameter here is the *Distort* parameter, which allows to specify a radial distortion of the image.
+In videos, where the camera is placed in close proximity to the speaker, the wide angle of the camera lens creates a barrel distortion, which expands the objects in the center of the image, while the content in the edges is being compressed.
+Such a distortion can be compensated with a negative value for the *Distort* parameter.
+Again, the requred adjustments are usually tiny.
+The following image shows a green screen rollup, whose edges appear bent because of the camera's barrel distortion.
+Note, how the edge of the room in the right side appears even more bent.
+The value for the *Distort* parameter, which compensates this clearly visible distortion, is only -0.018.
+
+.. image:: /images/lens_distortion.png
+   :scale: 20%
+
+
 Configuring the color keying
 ----------------------------
 
@@ -127,3 +155,16 @@ After configuring the processing of the green screen video(s), it is recommended
 
 >>> automation.save_greenscreen_scenes()
 
+
+Optimizing the performance of the green screen processing
+---------------------------------------------------------
+
+The many processing steps for the green screen video significantly impact the rendering time of the output video.
+Depending on their settings, some of the processing steps do not influence the resulting video and their boxes in the compositing view can be removed to speed up the rendering.
+The following command checks the settings and removes the boxes, which do not have an effect:
+
+>>> automation.optimize_greenscreen_processing()
+
+It also sets a configuration parameter, so that re-running the ``automation.setup()`` command does not bring back the deleted boxes.
+If the deleted processing steps shall be reintroduced, the configuration parameter has to be reset by editing the configuration file ``greenscreen.json`` in the ``Intermediate`` directory.
+In this situation, set the ``optimize`` parameter from ``true`` to ``false``.

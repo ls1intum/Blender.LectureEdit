@@ -93,6 +93,13 @@ def create_presentation():
     lecture_edit.create_presentation(merge_scene, paths, config)
 
 
+def optimize_greenscreen_processing():
+    paths = lecture_edit.Paths(bpy.data.filepath)
+    config = lecture_edit.Config(paths)
+    sync_scene, cut_scene, slides_scene, greenscreen_scenes, merge_scene = lecture_edit.scenes(paths, config)
+    lecture_edit.optimize_greenscreen_processing(greenscreen_scenes, paths, config)
+
+
 def save_greenscreen_scenes():
     paths = lecture_edit.Paths(bpy.data.filepath)
     config = lecture_edit.Config(paths)

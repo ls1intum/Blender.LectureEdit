@@ -33,6 +33,18 @@ limiter_lookahead = 0.025       # the lookahead time in seconds of the limiter
 # settings for the export of the slide transitions to PowerPoint
 fps_correction = (25 / fps) * (85918 / 70845) * (70832 / 70845)  # a correction factor for the slide transition times, so the video rendered by PowerPoint can be treated as if it had the desired frame rate
 
+# settings for compensating distortions in the green screen video
+# (as specified in the corner pin and lens distortion nodes in the Greenscreen scenes' compositing view)
+upper_left = (0.0, 1.0)  # these are x and y coordinates of the input videos corner points with respect to the output videos dimensions
+upper_right = (1.0, 1.0)
+lower_left = (0.0, 0.0)
+lower_right = (1.0, 0.0)
+fit_equalized = False
+jitter_distortion_compensation = False
+projector_distortion = False
+distortion_compensation = 0.0
+dispersion = 0.0
+
 # settings for cropping out the green screen
 # (as specified in the keying node in the Greenscreen scenes' compositing view)
 pre_blur = 0

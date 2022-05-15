@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
 import json
 import logging
 import os
@@ -172,7 +171,8 @@ class Config:
                     yield f"Animation {i}"
 
     def slide_durations(self, scene, powerpoint=False):
-        """yields tuples (total slide duration, [list of animation duration])"""
+        """yields tuples (total slide duration, [list of animation duration])
+        """
         if not powerpoint:
             fps = scene.render.fps
             last_frame = scene.frame_end
@@ -207,6 +207,28 @@ class Config:
             yield int(round(slide_duration / correction * 1000)) + 1000, [
                 int(round(d / correction * 1000)) for d in animation_durations
             ]
+
+    def optimize_greenscreen_processing(self):
+        return self.__config_get(self.__paths.greenscreen_config, "optimize", default=False)
+
+    def greenscreen_perspective(self, path):
+        result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("perspective distortion", {})
+        defaults = self.defaults()
+        result.setdefault("Upper Left", tuple(defaults.upper_left))
+        result.setdefault("Upper Right", tuple(defaults.upper_right))
+        result.setdefault("Lower Left", tuple(defaults.lower_left))
+        result.setdefault("Lower Right", tuple(defaults.lower_right))
+        return result
+
+    def greenscreen_lens(self, path):
+        result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("lens distortion", {})
+        defaults = self.defaults()
+        result.setdefault("Fit", defaults.fit_equalized)
+        result.setdefault("Jitter", defaults.jitter_distortion_compensation)
+        result.setdefault("Projector", defaults.projector_distortion)
+        result.setdefault("Distortion", defaults.distortion_compensation)
+        result.setdefault("Dispersion", defaults.dispersion)
+        return result
 
     def greenscreen_keying(self, path):
         result = self.__config_get(self.__paths.greenscreen_config, path.standard, default={}).get("keying", {})
