@@ -12,8 +12,5 @@ sphinx:
    configuration: documentation/conf.py
 
 python:
-   install:
-    - method: pip
-      path: numpy
-    - method: pip
-      path: matplotlib
+  install:
+    - requirements: documentation/requirements.txt
